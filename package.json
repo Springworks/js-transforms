@@ -1,0 +1,23 @@
+{
+  "name": "js-transforms",
+  "version": "0.0.0",
+  "description": "A collection of js transforms using jscodeshift",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Springworks/js-transforms.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Springworks/js-transforms/issues"
+  },
+  "homepage": "https://github.com/Springworks/js-transforms#readme",
+  "devDependencies": {
+    "jscodeshift": "0.3.8",
+    "mocha": "2.3.3"
+  }
+}
