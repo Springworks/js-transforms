@@ -67,3 +67,27 @@ beforeEach(function setupMockServer() {
 ```js
 beforeEach('setupMockServer', () => mockServer.start());
 ```
+
+
+## Writing a codemod
+
+- [esprima parse demo](http://esprima.org/demo/parse.html)
+- [AST types](https://github.com/benjamn/ast-types/blob/master/def/core.js) used by [recast](https://github.com/benjamn/recast)
+
+```js
+module.exports = function(file, api, options) {
+  const j = api.jscodeshift;
+  const root = j(file.source);
+
+  // Make changes to the AST
+  const vars = root.find(j.VariableDeclaration);
+
+  // Return null if no changes
+  if (vars.size() === 0) {
+    return null;
+  }
+
+  // Transform the modified AST and return the new source.
+  return root.toSource({ quote: 'single' });
+};
+```
