@@ -4,7 +4,7 @@
   "description": "A collection of js transforms using jscodeshift",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --reporter dot test",
+    "test": "mocha test",
     "test-watch": "mocha --watch --reporter min test"
   },
   "repository": {
