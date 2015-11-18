@@ -1,30 +1,57 @@
 'use strict';
 
-const assert = require('assert');
-const readFileSync = require('fs').readFileSync;
-const joinPath = require('path').join;
+const fs = require('fs');
+const path = require('path');
 const jscodeshift = require('jscodeshift');
 
-const read = name => readFileSync(joinPath(__dirname, '../test-fixtures', name), 'utf8');
+const fixture_path = path.join(__dirname, '../test-fixtures');
+const fixture_dirs = fs.readdirSync(fixture_path).filter(name => fs.statSync(path.join(fixture_path, name)).isDirectory());
 
 
-function testFixture(transform_name, test_file_name, options) {
-  const source = read(test_file_name + '.js');
-  const output = read(test_file_name + '.output.js');
-  const transform = require(joinPath(__dirname, '../transforms', transform_name + '.js'));
+fixture_dirs.forEach(transform_name => {
+  const transform = require(path.join(__dirname, '../transforms', transform_name));
 
-  const actual = (transform({ path: test_file_name + '.js', source: source }, { jscodeshift: jscodeshift }, options || {}) || '').trim();
-  const expected = output.trim();
-  assert.strictEqual(actual, expected);
+  describe(transform_name, () => {
+
+    getFixtureNames(transform_name).forEach(test_file_name => {
+      const read = ext => fs.readFileSync(path.join(fixture_path, transform_name, test_file_name + ext), 'utf8');
+      it(test_file_name, () => {
+        const source = read('.js');
+        const output = read('.output.js');
+
+        const options = {};
+        const actual = (transform({ path: test_file_name + '.js', source: source }, { jscodeshift: jscodeshift }, options) || '').trim();
+        const expected = output.trim();
+        assertFileDiff(actual, expected, test_file_name);
+      });
+    });
+
+  });
+});
+
+
+function getFixtureNames(transform_name) {
+  return fs.readdirSync(path.join(fixture_path, transform_name))
+      .filter(name => name.indexOf('.output.js') < 0 && path.extname(name) === '.js')
+      .map(name => path.basename(name, '.js'))
 }
 
 
-module.exports = function(transform_name, variations, options) {
-  describe(transform_name, function() {
-    variations.map(variation => transform_name + '-' + variation).forEach(name => {
-      it(name, () => {
-        testFixture(transform_name, name, options);
-      });
-    });
-  });
-};
+function assertFileDiff(actual, expected, test_file_name) {
+  if (actual === expected) {
+    return;
+  }
+
+  if (!actual) {
+    throw new Error('Expected ' + test_file_name + ' to have been modified.');
+  }
+
+  if (!expected) {
+    throw new Error('Expected ' + test_file_name + ' to not have been modified.');
+  }
+
+  const error = new Error('Expected ' + test_file_name + ' to match the fixture.');
+  error.actual = actual;
+  error.expected = expected;
+  throw error;
+}
