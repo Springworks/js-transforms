@@ -1,11 +1,10 @@
 'use strict';
 
-const assert = require('assert');
-const readFileSync = require('fs').readFileSync;
+const fs = require('fs');
 const joinPath = require('path').join;
 const jscodeshift = require('jscodeshift');
 
-const read = name => readFileSync(joinPath(__dirname, '../test-fixtures', name), 'utf8');
+const read = name => fs.readFileSync(joinPath(__dirname, '../test-fixtures', name), 'utf8');
 
 
 function testFixture(transform_name, test_file_name, options) {
@@ -15,7 +14,27 @@ function testFixture(transform_name, test_file_name, options) {
 
   const actual = (transform({ path: test_file_name + '.js', source: source }, { jscodeshift: jscodeshift }, options || {}) || '').trim();
   const expected = output.trim();
-  assert.strictEqual(actual, expected);
+  assertFileDiff(actual, expected, test_file_name);
+}
+
+
+function assertFileDiff(actual, expected, test_file_name) {
+  if (actual === expected) {
+    return;
+  }
+
+  if (!actual) {
+    throw new Error('Expected ' + test_file_name + ' to have been modified.');
+  }
+
+  if (!expected) {
+    throw new Error('Expected ' + test_file_name + ' to not have been modified.');
+  }
+
+  const error = new Error('Expected ' + test_file_name + ' to match the fixture.');
+  error.actual = actual;
+  error.expected = expected;
+  throw error;
 }
 
 
