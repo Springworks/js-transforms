@@ -3,96 +3,63 @@
 const MODULE_NAME = '@springworks/error-factory';
 
 
-module.exports = function(file, api, options) {
+module.exports = function(file, api) {
   const j = api.jscodeshift;
   const root = j(file.source);
-  //const results = [];
-  //const tracker = v => results.push(!!v);
+  const modified = createChangeTracker();
 
-  const result = [
-    transformRequired(j, root),
-    transformImported(j, root),
-  ];
+  transformRequired(j, modified, root);
+  transformImported(j, modified, root);
 
-  if (!result.some(Boolean)) {
-    return null;
-  }
-
-  const print_options = options.printOptions || { quote: 'single' };
-  return root.toSource(print_options);
+  return modified() ? root.toSource({ quote: 'single' }) : null;
 };
 
 
-function transformRequired(j, root) {
+function transformRequired(j, modified, root) {
   const require_calls = root.find(j.CallExpression, {
     callee: { name: 'require' },
     arguments: [{ value: MODULE_NAME }],
   });
 
-  if (require_calls.size() === 0) {
-    return false;
-  }
-
-  const result = [
-    transformRequiredWithMember(j, root, require_calls),
-    transformRequiredWithObject(j, root, require_calls),
-  ];
-  return result.some(Boolean);
+  transformRequiredWithMember(j, modified, root, require_calls);
+  transformRequiredWithObject(j, modified, root, require_calls);
 }
 
 
-function transformRequiredWithMember(j, root, require_calls) {
+function transformRequiredWithMember(j, modified, root, require_calls) {
   const filtered = require_calls.filter(path => {
     const ppv = path.parentPath.value;
     return ppv.type === 'MemberExpression' && ppv.property.name === 'create';
   });
 
-  if (filtered.size() === 0) {
-    return false;
-  }
-
-  let modified = [];
   filtered.forEach(path => {
     path.parentPath.value.property.name = 'createError';
     const local_name = path.parentPath.parentPath.parentPath.value[0].id.name;
-    const result = transformCallExpressionsToCreateWithName(j, root, local_name);
-    modified.push(result);
+    transformCallExpressionsToCreateWithName(j, modified, root, local_name);
   });
-
-  return modified.some(Boolean);
 }
 
 
-function transformCallExpressionsToCreateWithName(j, root, local_name) {
+function transformCallExpressionsToCreateWithName(j, modified, root, local_name) {
   const usage = root.find(j.CallExpression, { callee: { name: local_name } });
   usage.forEach(p => transformCallExpressionToCreate(j, p));
-  return usage.size() > 0;
+  modified(usage.size() > 0);
 }
 
 
-function transformRequiredWithObject(j, root, require_calls) {
+function transformRequiredWithObject(j, modified, root, require_calls) {
   const filtered = require_calls.filter(path => path.parentPath.value.type === 'VariableDeclarator');
-
-  if (filtered.size() === 0) {
-    return false;
-  }
-
-  let modified = false;
 
   filtered.forEach(path => {
     const local_name = path.parentPath.value.id.name;
     const usage = root.find(j.MemberExpression, { object: { name: local_name }, property: { name: 'create' } });
-
-    modified = usage.size();
-
     usage.forEach(p => transformCallExpressionToCreate(j, p.parentPath));
+    modified(usage.size() > 0);
   });
-
-  return modified;
 }
 
 
-function transformImported(j, root) {
+function transformImported(j, modified, root) {
   const import_declarations = root.find(j.ImportDeclaration, {
     specifiers: [
       {
@@ -102,13 +69,6 @@ function transformImported(j, root) {
     ],
     source: { value: '@springworks/error-factory' },
   });
-
-
-  if (import_declarations.size() === 0) {
-    return false;
-  }
-
-  let modified = [];
 
   import_declarations.forEach(path => {
     const specifier = path.value.specifiers.filter(o => o.imported.name === 'create')[0];
@@ -120,11 +80,8 @@ function transformImported(j, root) {
       delete specifier.local;
     }
 
-    const result = transformCallExpressionsToCreateWithName(j, root, local_name);
-    modified.push(result);
+    transformCallExpressionsToCreateWithName(j, modified, root, local_name);
   });
-
-  return modified.some(Boolean);
 }
 
 
@@ -164,4 +121,10 @@ function findErrorIdentifier(path) {
 function nameMightBeAnError(name) {
   const regex = /^(.+_)?err(or)?$/;
   return regex.test(name);
+}
+
+
+function createChangeTracker() {
+  let modified = false;
+  return value => modified = modified || !!value;
 }
