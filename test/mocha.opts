@@ -1,3 +1,4 @@
 --ui bdd
 --check-leaks
 --reporter dot
+--inline-diffs
