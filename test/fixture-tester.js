@@ -15,15 +15,30 @@ fixture_dirs.forEach(transform_name => {
 
     getFixtureNames(transform_name).forEach(test_file_name => {
       const read = ext => fs.readFileSync(path.join(fixture_path, transform_name, test_file_name + ext), 'utf8');
-      it(test_file_name, () => {
-        const source = read('.js');
-        const output = read('.output.js');
+      const source = read('.js');
+      const output = read('.output.js');
+      const expected = output.trim();
 
-        const options = {};
-        const actual = (transform({ path: test_file_name + '.js', source: source }, { jscodeshift: jscodeshift }, options) || '').trim();
-        const expected = output.trim();
-        assertFileDiff(actual, expected, test_file_name);
+      describe(test_file_name, () => {
+
+        it('should transform to expected output', () => {
+          const options = {};
+          const actual = (transform({ path: test_file_name + '.js', source: source }, { jscodeshift: jscodeshift }, options) || '').trim();
+          assertFileDiff(actual, expected, test_file_name);
+        });
+
+        if (expected) {
+          it('should not transform when rerun', () => {
+            const options = {};
+            const actual = (transform({ path: test_file_name + '.js', source: output }, { jscodeshift: jscodeshift }, options) || '').trim();
+            if (actual) {
+              assertFileDiff(actual, expected, test_file_name);
+            }
+          });
+        }
+
       });
+
     });
 
   });
@@ -46,11 +61,9 @@ function assertFileDiff(actual, expected, test_file_name) {
     throw new Error('Expected ' + test_file_name + ' to have been modified.');
   }
 
-  if (!expected) {
-    throw new Error('Expected ' + test_file_name + ' to not have been modified.');
-  }
-
-  const error = new Error('Expected ' + test_file_name + ' to match the fixture.');
+  const error = new Error(expected
+      ? 'Expected ' + test_file_name + ' to match the fixture.'
+      : 'Expected ' + test_file_name + ' to not have been modified.');
   error.actual = actual;
   error.expected = expected;
   throw error;
