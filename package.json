@@ -4,9 +4,9 @@
   "description": "A collection of js transforms using jscodeshift",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test",
-    "test-cov": "istanbul cover _mocha -- test",
-    "test-watch": "mocha --watch --reporter min test"
+    "test": "mocha",
+    "test-cov": "istanbul cover _mocha && istanbul check-coverage",
+    "test-watch": "mocha --watch --reporter min"
   },
   "repository": {
     "type": "git",
@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/Springworks/js-transforms#readme",
   "devDependencies": {
-    "istanbul": "^0.4.0",
+    "istanbul": "^0.4.1",
     "jscodeshift": "^0.3.9",
     "mocha": "^2.3.4"
   }

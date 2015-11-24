@@ -1,0 +1,9 @@
+instrumentation:
+  root: transforms
+  include-all-sources: true
+check:
+  global:
+    statements: 98.36
+    branches: 85.19
+    functions: 100
+    lines: 98.31
