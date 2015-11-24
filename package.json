@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha test",
+    "test-cov": "istanbul cover _mocha -- test",
     "test-watch": "mocha --watch --reporter min test"
   },
   "repository": {
@@ -18,7 +19,8 @@
   },
   "homepage": "https://github.com/Springworks/js-transforms#readme",
   "devDependencies": {
-    "jscodeshift": "0.3.8",
-    "mocha": "2.3.3"
+    "istanbul": "^0.4.0",
+    "jscodeshift": "^0.3.9",
+    "mocha": "^2.3.4"
   }
 }
