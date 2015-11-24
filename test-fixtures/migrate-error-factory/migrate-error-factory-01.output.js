@@ -1,6 +1,13 @@
 var createError = require('@springworks/error-factory').createError;
 
+createError({});
+createError({
+  code: 400
+});
+
 exports.someFunction = function(callback) {
+  createError({});
+
   doTheThing(function(err, val) {
     if (err) {
       callback(createError({
