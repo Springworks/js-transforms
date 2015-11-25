@@ -35,26 +35,26 @@ module.exports = function(file, api, options) {
 
   single_callback.forEach(p => {
     const fn = p.value[ARGS][0];
-    const arrow = createArrowFunctionExpression(j, fn, options);
+    const arrow = createArrowFunctionExpression(j, fn);
     const is_named = fn.id && fn.id.type === 'Identifier';
     p.value[ARGS] = is_named ? [j.literal(fn.id.name), arrow] : [arrow];
   });
 
   description_and_callback.forEach(p => {
-    p.value[ARGS][1] = createArrowFunctionExpression(j, p.value[ARGS][1], options)
+    p.value[ARGS][1] = createArrowFunctionExpression(j, p.value[ARGS][1])
   });
 
   return root.toSource(printOptions);
 };
 
 
-function getBodyStatement(fn, options) {
-  if (fn.body.type == 'BlockStatement' && fn.body.body.length == 1) {
+function getBodyStatement(fn) {
+  if (fn.body.type === 'BlockStatement' && fn.body.body.length === 1) {
     const inner = fn.body.body[0];
-    if (options['inline-single-expressions'] && inner.type == 'ExpressionStatement') {
+    if (inner.type === 'ExpressionStatement') {
       return inner.expression;
     }
-    if (inner.type == 'ReturnStatement') {
+    if (inner.type === 'ReturnStatement') {
       return inner.argument;
     }
   }
@@ -62,8 +62,8 @@ function getBodyStatement(fn, options) {
 }
 
 
-function createArrowFunctionExpression(j, fn, options) {
-  return j.arrowFunctionExpression(fn.params, getBodyStatement(fn, options), false);
+function createArrowFunctionExpression(j, fn) {
+  return j.arrowFunctionExpression(fn.params, getBodyStatement(fn), false);
 }
 
 

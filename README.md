@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Springworks/js-transforms.svg?branch=master)](https://travis-ci.org/Springworks/js-transforms)
+
 # js-transforms
 
 A collection of js transforms using [jscodeshift](https://github.com/facebook/jscodeshift)
