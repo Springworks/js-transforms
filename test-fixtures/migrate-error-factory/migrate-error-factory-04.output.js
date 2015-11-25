@@ -7,7 +7,7 @@ exports.someFunction = function() {
 
 function handleError(err) {
   log(err, 'Log message');
-  throw ErrorFactory.create({
+  throw ErrorFactory.createError({
     code: 500,
     message: 'Oh no!',
     cause: err

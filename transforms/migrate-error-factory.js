@@ -53,7 +53,10 @@ function transformRequiredWithObject(j, modified, root, require_calls) {
   filtered.forEach(path => {
     const local_name = path.parentPath.value.id.name;
     const usage = root.find(j.MemberExpression, { object: { name: local_name }, property: { name: 'create' } });
-    usage.forEach(p => transformCallExpressionToCreate(j, p.parentPath));
+    usage.forEach(p => {
+      p.value.property.name = 'createError';
+      transformCallExpressionToCreate(j, p.parentPath);
+    });
     modified(usage.size() > 0);
   });
 }
