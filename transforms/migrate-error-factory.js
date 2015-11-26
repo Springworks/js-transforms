@@ -111,10 +111,13 @@ function transformCallExpressionToCreate(j, path) {
 
 function findErrorIdentifier(path) {
   while (path && (path = path.parentPath)) {
-    if (path.value.type === 'FunctionExpression' || path.value.type === 'FunctionDeclaration') {
+    if (path.value.type === 'FunctionExpression' || path.value.type === 'FunctionDeclaration' || path.value.type === 'ArrowFunctionExpression') {
       if (path.value.params.length > 0 && nameMightBeAnError(path.value.params[0].name)) {
         return path.value.params[0];
       }
+    }
+    if (path.value.type === 'CatchClause' && nameMightBeAnError(path.value.param.name)) {
+      return path.value.param;
     }
   }
   return null;
