@@ -1,12 +1,14 @@
 'use strict';
 
+const helpers = require('./common/helpers');
+
 const MODULE_NAME = '@springworks/error-factory';
 
 
 module.exports = function(file, api) {
   const j = api.jscodeshift;
   const root = j(file.source);
-  const modified = createChangeTracker();
+  const modified = helpers.createChangeTracker();
 
   transformRequired(j, modified, root);
   transformImported(j, modified, root);
@@ -127,10 +129,4 @@ function findErrorIdentifier(path) {
 function nameMightBeAnError(name) {
   const regex = /^(.+_)?err(or)?$/;
   return regex.test(name);
-}
-
-
-function createChangeTracker() {
-  let modified = false;
-  return value => modified = modified || !!value;
 }
