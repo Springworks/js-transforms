@@ -24,7 +24,7 @@ fixture_dirs.forEach(transform_name => {
         it('should transform to expected output', () => {
           const options = {};
           const actual = (transform({ path: test_file_name + '.js', source: source }, { jscodeshift: jscodeshift }, options) || '').trim();
-          assertFileDiff(actual, expected, test_file_name);
+          assertFileDiff(actual, expected, source, transform_name, test_file_name, 'transform');
         });
 
         if (expected) {
@@ -32,7 +32,7 @@ fixture_dirs.forEach(transform_name => {
             const options = {};
             const actual = (transform({ path: test_file_name + '.js', source: output }, { jscodeshift: jscodeshift }, options) || '').trim();
             if (actual) {
-              assertFileDiff(actual, expected, test_file_name);
+              assertFileDiff(actual, expected, source, transform_name, test_file_name, 'rerun');
             }
           });
         }
@@ -52,19 +52,17 @@ function getFixtureNames(transform_name) {
 }
 
 
-function assertFileDiff(actual, expected, test_file_name) {
+function assertFileDiff(actual, expected, source, transform_name, test_file_name, test_case) {
   if (actual === expected) {
     return;
   }
 
-  if (!actual) {
-    throw new Error('Expected ' + test_file_name + ' to have been modified.');
-  }
-
-  const error = new Error(expected
-      ? 'Expected ' + test_file_name + ' to match the fixture.'
+  const error = new Error(actual && expected
+      ? 'Expected ' + test_file_name + ' to match the fixture.' : expected
+      ? 'Expected ' + test_file_name + ' to have been modified.'
       : 'Expected ' + test_file_name + ' to not have been modified.');
-  error.actual = actual;
+  error.actual = actual || source;
   error.expected = expected;
+  error.stack = transform_name + ' > ' + test_file_name + ' > ' + test_case;
   throw error;
 }
