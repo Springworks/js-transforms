@@ -13,6 +13,7 @@ module.exports = function(file, api, options) {
   const function_expressions = root.find(j.FunctionExpression)
       .filter(p => !isNamedFunctionExpression(p) &&
                    !isMemberAssignment(p) &&
+                   !isMethodProperty(p) &&
                    !helpers.containsThisExpression(j, p) &&
                    !helpers.containsArgumentsIdentifier(j, p));
 
@@ -23,13 +24,21 @@ module.exports = function(file, api, options) {
   return modified() ? root.toSource({ quote: 'single' }) : null;
 };
 
+
 function isNamedFunctionExpression(function_expr) {
   return !!function_expr.value.id;
 }
 
+
 function isMemberAssignment(path) {
   const p = path.parentPath;
   return !!p && p.value.type === 'AssignmentExpression' && p.value.left.type === 'MemberExpression';
+}
+
+
+function isMethodProperty(path) {
+  const p = path.parentPath;
+  return !!p && p.value.type === 'Property' && p.value.method === true;
 }
 
 
