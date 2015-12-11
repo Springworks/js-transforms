@@ -118,7 +118,7 @@ function findErrorIdentifier(path) {
         return path.value.params[0];
       }
     }
-    if (path.value.type === 'CatchClause' && nameMightBeAnError(path.value.param.name)) {
+    if (path.value.type === 'CatchClause') {
       return path.value.param;
     }
   }
