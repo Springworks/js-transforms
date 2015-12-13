@@ -21,7 +21,7 @@ fixture_dirs.forEach(transform_name => {
 
       describe(test_file_name, () => {
 
-        it('should transform to expected output', () => {
+        it(expected ? 'should transform to expected output' : 'should not transform', () => {
           const options = {};
           const actual = (transform({ path: test_file_name + '.js', source: source }, { jscodeshift: jscodeshift }, options) || '').trim();
           assertFileDiff(actual, expected, source, transform_name, test_file_name, 'transform');
