@@ -4,9 +4,10 @@
   "description": "A collection of js transforms using jscodeshift",
   "main": "index.js",
   "scripts": {
-    "test": "mocha",
-    "test-cov": "istanbul cover _mocha && istanbul check-coverage",
-    "test-watch": "mocha --watch --reporter min"
+    "test": "NODE_ENV=test mocha",
+    "cov": "NODE_ENV=test istanbul cover _mocha",
+    "test-cov": "NODE_ENV=test istanbul cover _mocha && istanbul check-coverage",
+    "test-watch": "NODE_ENV=test mocha --watch --reporter min"
   },
   "repository": {
     "type": "git",
