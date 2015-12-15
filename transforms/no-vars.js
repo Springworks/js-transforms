@@ -7,15 +7,16 @@ module.exports = function(file, api) {
   const j = api.jscodeshift;
   const root = j(file.source);
   const modified = helpers.createChangeTracker();
+  const file_path = file.path;
 
-  convertVariableDeclarations(j, modified, root);
+  convertVariableDeclarations(j, modified, root, file_path);
   convertForLoopInitAssignments(j, modified, root);
 
   return modified() ? root.toSource({ quote: 'single' }) : null;
 };
 
 
-function convertVariableDeclarations(j, modified, root) {
+function convertVariableDeclarations(j, modified, root, file_path) {
   return root.find(j.VariableDeclaration).forEach(path => {
     const kind = path.value.kind;
     if (kind === 'const') {
@@ -23,7 +24,7 @@ function convertVariableDeclarations(j, modified, root) {
     }
 
     if (isForLoopType(path.parent.value.type)) {
-      convertLoopVariableDeclarations(j, modified, path);
+      convertLoopVariableDeclarations(j, modified, path, file_path);
       return;
     }
 
@@ -58,7 +59,7 @@ function convertVariableDeclarations(j, modified, root) {
 }
 
 
-function convertLoopVariableDeclarations(j, modified, path) {
+function convertLoopVariableDeclarations(j, modified, path, file_path) {
   if (!isAccessedInClosure(j, path.parent)) {
     path.value.kind = path.value.declarations.some(declaration => isMutated(j, path, declaration)) ? 'let' : 'const';
     modified(true);
@@ -72,7 +73,7 @@ function convertLoopVariableDeclarations(j, modified, path) {
         'inside a new scope. This could be indicative of a race ' +
         'condition or other unintended access. We have left the ' +
         'binding as a `var`. View the following code at `%s:%s`',
-        file.path, path.value.loc.start.line
+        file_path, path.value.loc.start.line
     );
     console.log(j(path.parent).toSource() + '\n');
   }
