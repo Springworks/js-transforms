@@ -1,11 +1,19 @@
 describe(__filename, function() {
 
-  before(() => foo());
+  before(() => {
+    foo();
+  });
 
-  after(() => foo());
+  after(() => {
+    foo();
+  });
 
-  beforeEach(() => foo());
+  beforeEach(() => {
+    foo();
+  });
 
-  afterEach(() => foo());
+  afterEach(() => {
+    foo();
+  });
 
 });

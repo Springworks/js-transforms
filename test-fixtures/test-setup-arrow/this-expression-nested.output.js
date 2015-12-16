@@ -1,7 +1,9 @@
 describe(__filename, function() {
 
-  before(() => foo(function() {
-    this.bar();
-  }));
+  before(() => {
+    foo(function() {
+      this.bar();
+    });
+  });
 
 });

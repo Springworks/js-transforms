@@ -37,13 +37,13 @@ module.exports = function(file, api, options) {
 
   single_callback.forEach(p => {
     const fn = p.value[ARGS][0];
-    const arrow = helpers.createArrowFunctionExpression(j, fn, true);
+    const arrow = helpers.createArrowFunctionExpression(j, fn);
     const is_named = fn.id && fn.id.type === 'Identifier';
     p.value[ARGS] = is_named ? [j.literal(fn.id.name), arrow] : [arrow];
   });
 
   description_and_callback.forEach(p => {
-    p.value[ARGS][1] = helpers.createArrowFunctionExpression(j, p.value[ARGS][1], true)
+    p.value[ARGS][1] = helpers.createArrowFunctionExpression(j, p.value[ARGS][1])
   });
 
   return root.toSource(printOptions);

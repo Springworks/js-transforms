@@ -9,16 +9,12 @@ function createChangeTracker() {
 
 
 exports.createArrowFunctionExpression = createArrowFunctionExpression;
-function createArrowFunctionExpression(j, fn, inline_single_expression) {
+function createArrowFunctionExpression(j, fn) {
   let body = fn.body;
   let is_expression = body.type === 'Expression';
   if (body.type === 'BlockStatement' && body.body.length === 1) {
     const statement = fn.body.body[0];
-    if (inline_single_expression && statement.type === 'ExpressionStatement') {
-      body = statement.expression;
-      is_expression = true;
-    }
-    else if (statement.type === 'ReturnStatement') {
+    if (statement.type === 'ReturnStatement') {
       body = statement.argument;
       is_expression = true;
     }
