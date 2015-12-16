@@ -1,4 +1,4 @@
-describe(__filename, function() {
+describe(__filename, () => {
 
   before(() => {
     foo(function() {

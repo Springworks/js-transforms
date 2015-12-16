@@ -2,7 +2,12 @@
 
 const helpers = require('./common/helpers');
 
-const TARGETS = new Set([
+const test_fn_names = new Set([
+  'describe',
+  'it',
+]);
+
+const setup_fn_names = new Set([
   'before',
   'after',
   'beforeEach',
@@ -17,21 +22,24 @@ module.exports = function(file, api, options) {
   const printOptions = options.printOptions || { quote: 'single' };
   const root = j(file.source);
 
-  const call_to_setup_fns = root
-      .find(j.CallExpression, { callee: { type: 'Identifier' } })
-      .filter(p => TARGETS.has(p.value.callee.name));
+  const call_expressions = root.find(j.CallExpression, { callee: { type: 'Identifier' } });
+  const call_to_setup_fns = call_expressions.filter(p => setup_fn_names.has(p.value.callee.name));
 
-  const single_callback = call_to_setup_fns
-      .filter(p => p.value[ARGS].length === 1)
-      .filter(p => p.value[ARGS][0].type === 'FunctionExpression')
-      .filter(p => canBeConvertedToArrow(j, p.value[ARGS][0]));
+  const single_callback = call_to_setup_fns.filter(p => p.value[ARGS].length === 1 &&
+                                                        p.value[ARGS][0].type === 'FunctionExpression' &&
+                                                        canBeConvertedToArrow(j, p.value[ARGS][0]));
 
-  const description_and_callback = call_to_setup_fns
-      .filter(p => p.value[ARGS].length === 2)
-      .filter(p => p.value[ARGS][0].type === 'Literal' && p.value[ARGS][1].type === 'FunctionExpression')
-      .filter(p => canBeConvertedToArrow(j, p.value[ARGS][1]));
+  const description_and_callback = call_to_setup_fns.filter(p => p.value[ARGS].length === 2 &&
+                                                                 p.value[ARGS][0].type === 'Literal' &&
+                                                                 p.value[ARGS][1].type === 'FunctionExpression' &&
+                                                                 canBeConvertedToArrow(j, p.value[ARGS][1]));
 
-  if (single_callback.size() === 0 && description_and_callback.size() === 0) {
+  const call_to_test_fns = call_expressions.filter(p => test_fn_names.has(p.value.callee.name) &&
+                                                        p.value[ARGS].length === 2 &&
+                                                        p.value[ARGS][1].type === 'FunctionExpression' &&
+                                                        canBeConvertedToArrow(j, p.value[ARGS][1]));
+
+  if (single_callback.size() === 0 && description_and_callback.size() === 0 && call_to_test_fns.size() === 0) {
     return null;
   }
 
@@ -43,7 +51,11 @@ module.exports = function(file, api, options) {
   });
 
   description_and_callback.forEach(p => {
-    p.value[ARGS][1] = helpers.createArrowFunctionExpression(j, p.value[ARGS][1])
+    p.value[ARGS][1] = helpers.createArrowFunctionExpression(j, p.value[ARGS][1]);
+  });
+
+  call_to_test_fns.forEach(p => {
+    p.value[ARGS][1] = helpers.createArrowFunctionExpression(j, p.value[ARGS][1], true);
   });
 
   return root.toSource(printOptions);
