@@ -61,6 +61,6 @@ module.exports = function(file, api, options) {
   return root.toSource(printOptions);
 };
 
-function canBeConvertedToArrow(j, fn_body) {
-  return !helpers.containsThisExpression(j, fn_body) && !helpers.containsArgumentsIdentifier(j, fn_body);
+function canBeConvertedToArrow(j, fn_expr) {
+  return !helpers.containsThisExpression(j, fn_expr) && !helpers.containsArgumentsIdentifier(j, fn_expr);
 }
