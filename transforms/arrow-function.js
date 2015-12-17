@@ -17,7 +17,7 @@ module.exports = function(file, api, options) {
                    !helpers.containsThisExpression(j, p) &&
                    !helpers.containsArgumentsIdentifier(j, p));
 
-  function_expressions.replaceWith(p => helpers.createArrowFunctionExpression(j, p.value, false));
+  function_expressions.replaceWith(p => helpers.createArrowFunctionExpression(j, p.value));
 
   modified(function_expressions.size() > 0);
 
@@ -56,6 +56,6 @@ function transformBoundFunctionExpressions(j, modified, root) {
     const is_named = !!v.callee.object.id;
     return !is_named && a && a.length === 1 && a[0].type === 'ThisExpression';
   });
-  filtered.forEach(path => j(path).replaceWith(helpers.createArrowFunctionExpression(j, path.value.callee.object, false)));
+  filtered.forEach(path => j(path).replaceWith(helpers.createArrowFunctionExpression(j, path.value.callee.object)));
   modified(filtered.size() > 0);
 }

@@ -46,14 +46,14 @@ let j;
 ```
 
 
-### `test-setup-arrow`
+### `mocha-arrow`
 
-Finds all calls to mochas `before`, `after`, `beforeEach` and `afterEach` functions in tests and transforms the function callback into an arrow function. If the function is a named function then an argument is inserted with a string literal of the name.
+Finds all calls to mochas `describe`, `it`, `before`, `after`, `beforeEach` and `afterEach` functions in tests and transforms the function callback into an arrow function. If the function is a named function then an argument is inserted with a string literal of the name.
 
 #### Example
 
 ```
-jscodeshift -t js-transforms/transforms/test-setup-arrow.js project/test
+jscodeshift -t js-transforms/transforms/mocha-arrow.js project/test
 ```
 
 ##### Input
