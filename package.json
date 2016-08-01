@@ -21,7 +21,7 @@
   "homepage": "https://github.com/Springworks/js-transforms#readme",
   "devDependencies": {
     "istanbul": "^0.4.1",
-    "jscodeshift": "^0.3.9",
+    "jscodeshift": "^0.3.21",
     "mocha": "^3.0.0"
   }
 }
